@@ -1,0 +1,63 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+
+using namespace std;
+
+unordered_map<string, string> memo;
+
+string makeKey(int row, int col, int target) {
+    return to_string(row) + "," + to_string(col) + "," + to_string(target);
+}
+
+string findPath(const vector<vector<int>>& pyramid, int row, int col, int currentProduct, int target) {
+    // Base case: 
+    if (row >= pyramid.size() || col < 0 || col >= pyramid[row].size()) return "";
+    
+    currentProduct *= pyramid[row][col];
+    
+    if (row == pyramid.size() - 1) {
+        return currentProduct == target ? "" : "-1";
+    }
+    
+    string key = makeKey(row, col, currentProduct);
+    if (memo.find(key) != memo.end()) return memo[key];
+    
+    string leftPath = findPath(pyramid, row + 1, col, currentProduct, target);
+    if (leftPath != "-1") {
+        memo[key] = "L" + leftPath;
+        return memo[key];
+    }
+    
+    string rightPath = findPath(pyramid, row + 1, col + 1, currentProduct, target);
+    if (rightPath != "-1") {
+        memo[key] = "R" + rightPath;
+        return memo[key];
+    }
+    
+    memo[key] = "-1";
+    return "-1";
+}
+
+string pyramidDescentPuzzle(const vector<vector<int>>& pyramid, int target) {
+    string result = findPath(pyramid, 0, 0, 1, target);
+    return result == "-1" ? "No valid path" : result;
+}
+
+int main() {
+    //Example
+    vector<vector<int>> pyramid = {
+        {2},
+        {4, 3},
+        {3, 2, 6},
+        {2, 9, 5, 2},
+        {10, 5, 2, 15, 5}
+    };
+    int target = 720;
+    
+    string path = pyramidDescentPuzzle(pyramid, target);
+    cout << "Path: " << path << endl;
+    
+    return 0;
+}
